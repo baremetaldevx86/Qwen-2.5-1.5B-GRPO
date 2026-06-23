@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.venv/
+wandb/
+outputs/
+checkpoints/
+*.json
+!configs/*.json
+.pytest_cache/
