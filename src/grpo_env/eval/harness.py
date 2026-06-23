@@ -1,9 +1,12 @@
 from collections.abc import Callable
 
+from grpo_env.rewards.gsm8k_reward import _distinct_boxed_values
 from grpo_env.rewards.parsing import extract_model_answer, answers_match
 
 
 def score_completion(completion: str, gold_answer: str) -> bool:
+    if len(_distinct_boxed_values(completion)) > 1:
+        return False
     return answers_match(extract_model_answer(completion), gold_answer)
 
 

@@ -7,3 +7,4 @@ checkpoints/
 *.json
 !configs/*.json
 .pytest_cache/
+src/*.egg-info/

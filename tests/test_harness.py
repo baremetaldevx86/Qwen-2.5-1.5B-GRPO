@@ -6,6 +6,15 @@ def test_score_completion():
     assert score_completion("\\boxed{17}", "18") is False
 
 
+def test_score_completion_anti_hack_multiple_distinct_boxed():
+    # Matches reward function's anti-hack guard
+    assert score_completion("\\boxed{1}\\boxed{18}", "18") is False
+
+
+def test_score_completion_repeated_same_boxed_ok():
+    assert score_completion("\\boxed{18}\\boxed{18}", "18") is True
+
+
 def test_pass_at_1():
     records = [
         {"completion": "\\boxed{18}", "gold_answer": "18"},

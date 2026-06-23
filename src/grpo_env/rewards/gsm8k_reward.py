@@ -32,10 +32,10 @@ def total_reward(completion: str, gold_answer: str) -> float:
 
 
 def make_trl_reward_funcs() -> list:
-    def correctness_func(prompts, completions, gold_answer, **kwargs) -> list[float]:
+    def correctness_func(prompts: list[str], completions: list[str], gold_answer: list[str], **kwargs) -> list[float]:
         return [correctness_reward(c, g) for c, g in zip(completions, gold_answer)]
 
-    def format_func(prompts, completions, gold_answer, **kwargs) -> list[float]:
+    def format_func(prompts: list[str], completions: list[str], gold_answer: list[str], **kwargs) -> list[float]:
         return [format_reward(c) for c in completions]
 
     correctness_func.__name__ = "correctness_reward"

@@ -12,6 +12,8 @@ This module provides:
 from __future__ import annotations
 
 import numpy as np
+from datasets import Dataset
+from transformers import PreTrainedModel, PreTrainedTokenizerBase
 from trl import GRPOConfig, GRPOTrainer
 
 from grpo_env.algo.advantage import compute_grouped_advantages_by_size
@@ -90,9 +92,9 @@ class AdvantageAuditTrainer(GRPOTrainer):
 
 def build_trainer(
     cfg: dict,
-    model,
-    tokenizer,
-    train_ds,
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizerBase,
+    train_ds: Dataset,
     reward_funcs: list,
 ) -> AdvantageAuditTrainer:
     """Construct and return an AdvantageAuditTrainer from a config dict.
