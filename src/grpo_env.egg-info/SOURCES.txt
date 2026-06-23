@@ -1,3 +1,4 @@
+README.md
 pyproject.toml
 src/grpo_env/__init__.py
 src/grpo_env.egg-info/PKG-INFO
@@ -6,8 +7,20 @@ src/grpo_env.egg-info/dependency_links.txt
 src/grpo_env.egg-info/requires.txt
 src/grpo_env.egg-info/top_level.txt
 src/grpo_env/algo/__init__.py
+src/grpo_env/algo/advantage.py
 src/grpo_env/envs/__init__.py
+src/grpo_env/envs/base.py
+src/grpo_env/envs/gsm8k.py
 src/grpo_env/eval/__init__.py
 src/grpo_env/rewards/__init__.py
+src/grpo_env/rewards/gsm8k_reward.py
+src/grpo_env/rewards/parsing.py
 src/grpo_env/utils/__init__.py
+src/grpo_env/utils/prompts.py
+src/grpo_env/utils/seeding.py
+tests/test_advantage.py
+tests/test_gsm8k_env.py
+tests/test_gsm8k_reward.py
+tests/test_harness.py
+tests/test_parsing.py
 tests/test_seeding.py

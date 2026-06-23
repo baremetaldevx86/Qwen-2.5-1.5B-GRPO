@@ -39,3 +39,4 @@ def test_evaluate_with_fake_generate():
     assert result["pass@1"] == 0.5
     assert result["n"] == 2
     assert len(result["per_example"]) == 2
+    assert result["pass@k"] == 0.5

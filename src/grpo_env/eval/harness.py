@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from grpo_env.rewards.parsing import extract_model_answer, answers_match
 
 
@@ -22,7 +24,7 @@ def pass_at_k(grouped_records: list[list[dict]]) -> float:
     return hits / len(grouped_records)
 
 
-def evaluate(generate_fn, examples: list[dict], k: int = 1) -> dict:
+def evaluate(generate_fn: Callable[[list[str], int], list[list[str]]], examples: list[dict], k: int = 1) -> dict:
     prompts = [ex["prompt"] for ex in examples]
     golds = [ex["gold_answer"] for ex in examples]
     completions_per_prompt = generate_fn(prompts, k)  # list[list[str]]
