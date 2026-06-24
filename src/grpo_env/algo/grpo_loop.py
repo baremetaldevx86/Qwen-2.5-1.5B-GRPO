@@ -116,7 +116,6 @@ def build_trainer(
         beta=cfg["kl_beta"],
         epsilon=cfg["clip_epsilon"],
         max_completion_length=cfg["max_completion_length"],
-        max_prompt_length=cfg["max_prompt_length"],
         temperature=cfg["temperature"],
         num_train_epochs=cfg["num_train_epochs"],
         max_steps=cfg["max_steps"],
