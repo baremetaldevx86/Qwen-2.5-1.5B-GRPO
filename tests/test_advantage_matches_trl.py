@@ -3,11 +3,14 @@ from grpo_env.algo.advantage import compute_grouped_advantages_by_size
 
 
 def _trl_reference_advantages(rewards, group_size, eps=1e-4):
-    """Mirror of TRL GRPOTrainer's group-normalized advantage:
-    reshape to (num_groups, group_size), subtract row mean, divide by row std+eps."""
+    """Mirror of TRL 1.6.0 GRPOTrainer's group-normalized advantage.
+
+    TRL uses nanstd with Bessel's correction (ddof=1), so we match that here.
+    reshape to (num_groups, group_size), subtract row mean, divide by sample std+eps.
+    """
     r = np.asarray(rewards, dtype=np.float64).reshape(-1, group_size)
     mean = r.mean(axis=1, keepdims=True)
-    std = r.std(axis=1, keepdims=True)
+    std = r.std(axis=1, ddof=1, keepdims=True)
     adv = (r - mean) / (std + eps)
     return adv.reshape(-1).tolist()
 

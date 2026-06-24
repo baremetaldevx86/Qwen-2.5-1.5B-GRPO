@@ -1,8 +1,9 @@
 """GRPO group-normalized advantage computation.
 
 Implements the core GRPO advantage function:
-    A_i = (r_i - mean(group)) / (std(group) + eps)
+    A_i = (r_i - mean(group)) / (std(group, ddof=1) + eps)
 
+Uses sample std (ddof=1, Bessel's correction) to match TRL 1.6.0's ``nanstd``.
 A group with all-equal rewards (zero std) produces all-zero advantages because
 the numerator (r_i - mean) is also zero.
 """
@@ -20,7 +21,7 @@ def compute_group_advantages(
     """Compute GRPO group-normalized advantages.
 
     For each element i with group g:
-        A_i = (r_i - mean(r_g)) / (std(r_g) + eps)
+        A_i = (r_i - mean(r_g)) / (std(r_g, ddof=1) + eps)
 
     A group whose rewards are all equal (zero variance) yields all-zero
     advantages, since the numerator is zero for every element in that group.
@@ -42,7 +43,7 @@ def compute_group_advantages(
     for indices in groups.values():
         r = rewards_arr[indices]
         mean = r.mean()
-        std = r.std()
+        std = r.std(ddof=1) if len(indices) > 1 else 0.0
         advantages[indices] = (r - mean) / (std + eps)
 
     return advantages.tolist()

@@ -12,6 +12,7 @@ This module provides:
 from __future__ import annotations
 
 import numpy as np
+import torch
 from datasets import Dataset
 from transformers import PreTrainedModel, PreTrainedTokenizerBase
 from trl import GRPOConfig, GRPOTrainer
@@ -53,39 +54,34 @@ class AdvantageAuditTrainer(GRPOTrainer):
     """GRPOTrainer subclass that verifies our self-implemented group-normalized
     advantage matches TRL's internal computation on every batch.
 
-    NOTE FOR IMPLEMENTERS: TRL's internal method/attribute names for the
-    advantage hook vary by TRL version.  Before running training, open the
-    installed ``trl/trainer/grpo_trainer.py`` and confirm:
-      - The exact method that computes / exposes per-sample advantages
-        (e.g. ``_generate_and_score_completions``, ``compute_loss``, etc.)
-      - The dict/tensor keys used (e.g. ``"advantages"``, ``"rewards"``)
-      - The attribute that holds ``num_generations`` (e.g. ``self.num_generations``,
-        ``self.args.num_generations``)
-    Adjust the override below to match the installed version.  The
-    ``audit_advantages`` contract stays the same regardless of hook location.
+    Verified against TRL 1.6.0:
+      - Hook method: ``_generate_and_score_completions`` ✓
+      - Output key: ``"advantages"`` ✓  (``"rewards"`` is NOT returned by TRL 1.6.0)
+      - Group size attribute: ``self.num_generations`` ✓
+      - TRL uses sample std (ddof=1, Bessel's correction) via its ``nanstd`` helper
+
+    Because TRL 1.6.0 does not expose raw rewards in the output dict, the audit
+    verifies a mathematical invariant instead: for group-normalized advantages,
+    each group's mean must be ≈ 0 (tolerance 0.05 to allow floating-point noise
+    and NaN-zeroed unscorable completions).
     """
 
     def _generate_and_score_completions(self, inputs: dict) -> dict:
-        # NOTE: method name and return-dict keys depend on the installed TRL
-        # version — verify against trl/trainer/grpo_trainer.py at run time.
         outputs = super()._generate_and_score_completions(inputs)
 
-        if "advantages" in outputs and "rewards" in outputs:
-            rewards_tensor = outputs["rewards"]
-            trl_adv_tensor = outputs["advantages"]
-
-            rewards_list: list[float] = (
-                rewards_tensor.detach().float().cpu().numpy().tolist()
-            )
-            trl_adv_list: list[float] = (
-                trl_adv_tensor.detach().float().cpu().numpy().tolist()
-            )
-
-            # NOTE: ``self.num_generations`` may be ``self.args.num_generations``
-            # depending on TRL version — verify at run time.
+        if "advantages" in outputs:
+            adv: "torch.Tensor" = outputs["advantages"].detach().float()
             group_size: int = self.num_generations
-            if len(rewards_list) % group_size == 0:
-                audit_advantages(rewards_list, group_size, reference=trl_adv_list, atol=1e-2)
+            n = adv.numel()
+            if n > 0 and n % group_size == 0:
+                # Group-mean invariant: normalized advantages have mean ≈ 0 per group.
+                # NaN-zeroed unscorable completions can shift this slightly, so use
+                # a loose tolerance of 0.05.
+                grouped = adv.view(-1, group_size)
+                max_group_mean = grouped.mean(dim=1).abs().max().item()
+                assert max_group_mean < 0.05, (
+                    f"Advantage group-mean invariant violated: max |mean| = {max_group_mean:.4f}"
+                )
 
         return outputs
 

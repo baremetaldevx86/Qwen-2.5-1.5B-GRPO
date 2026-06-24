@@ -11,13 +11,16 @@ def test_zero_variance_group_yields_zero_advantages():
 
 
 def test_known_vector_matches_expected():
-    # group 0: [0, 1], mean 0.5, std 0.5 -> (-1, +1); group 1: [2,4], mean 3 std 1 -> (-1,+1)
+    # group 0: [0, 1], mean=0.5, sample_std=1/sqrt(2)≈0.7071 -> adv≈±0.7071
+    # group 1: [2, 4], mean=3,   sample_std=sqrt(2)≈1.4142  -> adv≈±0.7071
+    # With ddof=1, all 2-element groups yield ±1/sqrt(2) regardless of scale.
+    import math as _math
+    expected = 1.0 / _math.sqrt(2)
     adv = compute_group_advantages([0.0, 1.0, 2.0, 4.0], [0, 0, 1, 1])
-    # eps tiny, so close to +-1
-    assert math.isclose(adv[0], -1.0, abs_tol=1e-3)
-    assert math.isclose(adv[1], 1.0, abs_tol=1e-3)
-    assert math.isclose(adv[2], -1.0, abs_tol=1e-3)
-    assert math.isclose(adv[3], 1.0, abs_tol=1e-3)
+    assert math.isclose(adv[0], -expected, abs_tol=1e-3)
+    assert math.isclose(adv[1],  expected, abs_tol=1e-3)
+    assert math.isclose(adv[2], -expected, abs_tol=1e-3)
+    assert math.isclose(adv[3],  expected, abs_tol=1e-3)
 
 
 def test_advantages_mean_zero_per_group():
@@ -26,9 +29,11 @@ def test_advantages_mean_zero_per_group():
 
 
 def test_by_size_wrapper():
+    import math as _math
+    expected = 1.0 / _math.sqrt(2)
     adv = compute_grouped_advantages_by_size([0.0, 1.0, 2.0, 4.0], group_size=2)
-    assert math.isclose(adv[0], -1.0, abs_tol=1e-3)
-    assert math.isclose(adv[3], 1.0, abs_tol=1e-3)
+    assert math.isclose(adv[0], -expected, abs_tol=1e-3)
+    assert math.isclose(adv[3],  expected, abs_tol=1e-3)
 
 
 def test_by_size_wrapper_rejects_bad_size():

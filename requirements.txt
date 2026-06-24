@@ -1,0 +1,26 @@
+# Core training stack
+torch==2.11.0
+transformers==5.9.0
+trl==1.6.0
+datasets==5.0.0
+accelerate==1.14.0
+deepspeed==0.19.2
+
+# Generation backend
+# Note: TRL 1.6.0 officially supports vLLM 0.12–0.19.
+# 0.22.1 works for eval but may require use_vllm: false in configs/grpo.yaml.
+# To use the supported range: pip install "vllm>=0.12,<0.20"
+vllm==0.22.1
+
+# Logging
+wandb==0.28.0
+
+# Numerics / serialization
+numpy==2.4.6
+safetensors==0.7.0
+tokenizers==0.22.2
+huggingface_hub==1.17.0
+
+# Testing
+pytest==9.0.3
+pytest-timeout==2.4.0
