@@ -6,19 +6,19 @@ End-to-end instructions to reproduce the Base → SFT → GRPO GSM8K training pi
 
 | Component | Version |
 |-----------|---------|
-| Python | 3.14 |
-| PyTorch | 2.11.0+cu130 |
+| Python | 3.11 |
+| PyTorch | 2.12.1+cu126 |
 | TRL | 1.6.0 |
 | Transformers | 5.9.0 |
 | Accelerate | 1.14.0 |
 | DeepSpeed | 0.19.2 |
-| vLLM | 0.22.1 (see note below) |
+| vLLM | 0.23.0 |
+| NVIDIA Driver | 580.x |
 | Hardware | 4 × A100 (GPUs 0-3) |
 
-> **vLLM version note**: TRL 1.6.0 officially supports vLLM 0.12–0.19. vLLM 0.22.1
-> is installed. If `use_vllm: true` causes errors during GRPO training, either
-> downgrade (`pip install vllm==0.19.3`) or set `use_vllm: false` in
-> `configs/grpo.yaml` (slower but reliable).
+> **vLLM note**: vLLM 0.23.0 requires NVIDIA driver 580+ (CUDA 13.0). TRL 1.6.0
+> officially supports vLLM 0.12–0.19 for GRPO training; 0.23.0 may require
+> verifying hook compatibility before the GRPO run.
 
 ## Pre-flight checklist
 
@@ -54,7 +54,8 @@ python scripts/eval.py --config configs/eval.yaml
 # Prints: [base] pass@1=X.XXXX  pass@1=X.XXXX
 ```
 
-Typical wall time: ~25 min on one A100 (1319 test examples, greedy, max_tokens=1024).
+Typical wall time: ~2–3 min on one A100 (1319 test examples, greedy, max_tokens=1024).
+vLLM batches all prompts concurrently so throughput is much higher than sequential generation.
 
 ---
 
