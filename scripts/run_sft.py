@@ -29,7 +29,7 @@ def main() -> None:
         learning_rate=cfg["learning_rate"],
         lr_scheduler_type=cfg["lr_scheduler_type"],
         warmup_ratio=cfg["warmup_ratio"],
-        max_seq_length=cfg["max_seq_length"],
+        max_length=cfg["max_seq_length"],
         bf16=cfg["bf16"],
         logging_steps=cfg["logging_steps"],
         save_strategy=cfg["save_strategy"],
