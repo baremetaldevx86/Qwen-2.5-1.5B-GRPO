@@ -80,7 +80,7 @@ Key config values (`configs/sft.yaml`):
 - `learning_rate`: 1e-5 (cosine, 3% warmup)
 - Effective batch size: 8 × 4 × 3 GPUs = 96
 
-Typical wall time: ~3-4 hours on 3 × A100.
+Typical wall time: ~7 min on 3 × A100 80GB (7.5k examples, 1.5B model).
 
 ### After SFT — eval
 
