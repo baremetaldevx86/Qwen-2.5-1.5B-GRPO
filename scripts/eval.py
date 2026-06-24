@@ -5,18 +5,13 @@ import yaml
 
 from grpo_env.utils.seeding import set_seed
 from grpo_env.envs.gsm8k import GSM8KEnv
+from grpo_env.eval.vllm_backend import make_generate_fn
 from grpo_env.eval.harness import evaluate
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
-    ap.add_argument(
-        "--backend",
-        choices=["hf", "vllm"],
-        default="hf",
-        help="Generation backend: 'hf' (transformers, default) or 'vllm'",
-    )
     args = ap.parse_args()
     cfg = yaml.safe_load(open(args.config))
 
@@ -25,24 +20,13 @@ def main() -> None:
     if cfg.get("limit"):
         examples = examples[: cfg["limit"]]
 
-    if args.backend == "vllm":
-        from grpo_env.eval.vllm_backend import make_generate_fn
-        generate_fn = make_generate_fn(
-            cfg["model_path"],
-            max_tokens=cfg["max_tokens"],
-            temperature=cfg["temperature"],
-            tensor_parallel_size=cfg["tensor_parallel_size"],
-            seed=cfg["seed"],
-        )
-    else:
-        from grpo_env.eval.hf_backend import make_generate_fn
-        generate_fn = make_generate_fn(
-            cfg["model_path"],
-            max_tokens=cfg["max_tokens"],
-            temperature=cfg["temperature"],
-            seed=cfg["seed"],
-        )
-
+    generate_fn = make_generate_fn(
+        cfg["model_path"],
+        max_tokens=cfg["max_tokens"],
+        temperature=cfg["temperature"],
+        tensor_parallel_size=cfg["tensor_parallel_size"],
+        seed=cfg["seed"],
+    )
     result = evaluate(generate_fn, examples, k=cfg["k"])
     result["model"] = cfg["model_path"]
     result["tag"] = cfg["tag"]
