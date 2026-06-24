@@ -27,3 +27,8 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+filterwarnings = [
+    "ignore:builtin type Swig:DeprecationWarning",
+    "ignore:TRL currently supports vLLM:UserWarning",
+    "ignore:SelectableGroups dict interface is deprecated:DeprecationWarning",
+]
