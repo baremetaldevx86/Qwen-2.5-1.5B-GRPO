@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import os
 
+import torch
 import yaml
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -46,7 +47,7 @@ def main() -> None:
 
     model = AutoModelForCausalLM.from_pretrained(
         cfg["model_path"],
-        torch_dtype="bfloat16",
+        dtype=torch.bfloat16,
     )
 
     # columns: prompt, gold_answer, question

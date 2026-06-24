@@ -1,4 +1,8 @@
 import argparse
+import math
+import os
+
+import torch
 import yaml
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from trl import SFTTrainer, SFTConfig
@@ -17,9 +21,18 @@ def main() -> None:
     tokenizer = AutoTokenizer.from_pretrained(cfg["model_path"])
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(cfg["model_path"], torch_dtype="bfloat16")
+    model = AutoModelForCausalLM.from_pretrained(cfg["model_path"], dtype=torch.bfloat16)
 
     train_ds = build_sft_dataset("train")
+
+    # Compute warmup_steps from warmup_ratio (warmup_ratio deprecated in transformers 5.x)
+    world_size = int(os.environ.get("WORLD_SIZE", 1))
+    steps_per_epoch = math.ceil(
+        len(train_ds)
+        / (cfg["per_device_train_batch_size"] * world_size * cfg["gradient_accumulation_steps"])
+    )
+    total_steps = steps_per_epoch * cfg["num_train_epochs"]
+    warmup_steps = max(1, int(cfg["warmup_ratio"] * total_steps))
 
     sft_config = SFTConfig(
         output_dir=cfg["output_dir"],
@@ -28,13 +41,14 @@ def main() -> None:
         gradient_accumulation_steps=cfg["gradient_accumulation_steps"],
         learning_rate=cfg["learning_rate"],
         lr_scheduler_type=cfg["lr_scheduler_type"],
-        warmup_ratio=cfg["warmup_ratio"],
+        warmup_steps=warmup_steps,
         max_length=cfg["max_seq_length"],
         bf16=cfg["bf16"],
         logging_steps=cfg["logging_steps"],
         save_strategy=cfg["save_strategy"],
         seed=cfg["seed"],
         dataset_text_field="text",
+        loss_type="nll",
         report_to="wandb",
         run_name=cfg["run_name"],
     )
