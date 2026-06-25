@@ -46,10 +46,6 @@ drove several design decisions:
 - **GRPO recovers the loss and surpasses both** (→ 73.2%). The headline claim is the
   defensible one: **GRPO over the SFT baseline, +2.5 points**, evaluated identically.
 
-A senior reviewer should read this as: the pipeline is honest, the lift is measured
-against a fixed baseline with a shared scorer, and the failure mode (SFT forgetting)
-is understood rather than papered over.
-
 ---
 
 ## Pipeline architecture
