@@ -282,3 +282,4 @@ vLLM rollout server during GRPO. Pinned versions (Python 3.11, PyTorch 2.x, TRL
 - **Reward shaping is intentionally minimal.** Only correctness + a light format bonus.
   Length penalties or step-level rewards are plausible future levers but were left out
   to keep the reward verifiable and the result attributable to GRPO itself.
+# Qwen-2.5-1.5B-no-sft
